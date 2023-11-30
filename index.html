@@ -1,0 +1,275 @@
+ <head>
+
+
+    <title>وقفة</title>
+
+
+  </head>
+
+
+ <style>
+   .box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.box select {
+  background-color: #0563af;
+  color: white;
+  padding: 12px;
+  width: 250px;
+  border: none;
+  font-size: 20px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+  -webkit-appearance: button;
+  appearance: button;
+  outline: none;
+}
+
+.box::before {
+  content: "";
+  font-family: FontAwesome;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20%;
+  height: 100%;
+  text-align: center;
+  font-size: 28px;
+  line-height: 45px;
+  color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+}
+
+.box:hover::before {
+  color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.box select option {
+  padding: 30px;
+}
+  
+  .row {
+ text-align: center;
+}
+ 
+  
+  
+  
+  
+  
+  </style>
+
+
+                                  
+
+
+
+
+
+
+
+<body>
+
+  <div class="search-form">
+      <div class="container">
+          <div class="row">
+          
+          <div class="box">
+
+              <div class="col-lg-12">
+                  <form id="search-form" name="gs" method="submit" role="search" action="#">
+                      <div class="row">
+                          <div class="col-lg-4">
+                              <fieldset>
+                                  <label for="chooseReciter" class="form-label">اختر القارئ</label>
+                               
+                                  
+                                  <select name="Category" class="form-select" aria-label="Default select example" id="chooseReciter" >
+                                      
+                                  </select>
+                              </fieldset>
+                          </div>
+                          <div class="col-lg-4">
+                              <fieldset>
+                                  <label for="chooseMoshaf" class="form-label">اختر الرواية</label>
+                                  <select name="Price" class="form-select" aria-label="Default select example" id="chooseMoshaf" >
+                                     
+                                  </select>
+                              </fieldset>
+                          </div>
+                          <div class="col-lg-4">
+                              <fieldset>
+                                  <label for="chooseSurah" class="form-label">اختر السورة</label>
+                                  <select name="Plan" class="form-select" aria-label="Default select example" id="chooseSurah" >
+                                     
+                                </select>
+                              </fieldset>
+                          </div>
+                          
+
+
+
+                          <div class="col-lg-12">
+                            <audio id="audioPlayer" controls autoplay muted style="width: 100%;">
+                            <source src="" type="audio/ogg">
+                            <source src="" type="audio/mpeg">
+                          Your browser does not support the audio element.
+                          </audio> 
+                        </div>
+
+
+
+
+                      </div>
+                  </form>
+              </div>
+              
+              
+                            </div>
+
+              
+          </div>
+      </div>
+  </div>
+
+
+
+  <footer>
+     
+  </footer>
+
+  <!-- Scripts-->
+  <!-- Bootstrap core JavaScript -->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+
+  <script src="assets/js/isotope.min.js"></script>
+  <script src="assets/js/owl-carousel.js"></script>
+
+  <script src="assets/js/tabs.js"></script>
+  <script src="assets/js/popup.js"></script>
+  <script src="assets/js/custom.js"></script>
+  <script src="assets/js/script.js"></script>
+  
+
+  <script>
+    setTimeout(function(){
+        $('.loader').fadeToggle();
+    }, 1500);
+	
+	$("a[href='#top']").click(function() {
+        $("html, body").animate({ scrollTop: 0 }, "slow");
+        return false;
+    });
+  </script>
+
+
+<style>
+
+
+
+
+
+
+</style>
+        
+        
+        
+        
+        
+        
+<script>
+const apiUrl = 'https://mp3quran.net/api/v3'; 
+const language = 'ar';
+
+async function getReciters() {
+      const chooseReciter = document.querySelector('#chooseReciter') 
+
+      const res = await fetch(`${apiUrl}/reciters?language=${language}`) 
+      const data = await res.json()
+
+      chooseReciter.innerHTML = `<option value="">اختر قارئ</option>`
+
+      data.reciters.forEach(reciter  => chooseReciter.innerHTML += `<option value="${reciter.id}">${reciter.name}</option>`);
+      chooseReciter.addEventListener('change', e => getMoshaf(e.target.value))
+
+
+}
+getReciters()
+
+
+async function getMoshaf(reciter) {
+    const chooseMoshaf = document.querySelector('#chooseMoshaf') 
+
+    const res = await fetch(`${apiUrl}/reciters?language=${language}&reciter=${reciter}`) 
+    const data = await res.json()
+    const moshafs = data.reciters[0].moshaf
+
+    chooseMoshaf.innerHTML = `<option value="" data-server="" data-surahList="" >اختر رواية</option>`
+
+   moshafs.forEach(moshaf  => chooseMoshaf.innerHTML += `<option value="${moshaf.id}" data-server="${moshaf.server}" data-surahList="${moshaf.surah_list}" >${moshaf.name}</option>`);
+
+
+
+
+   chooseMoshaf.addEventListener('change', e => {
+    const selectedmoshaf = chooseMoshaf.options[chooseMoshaf.selectedIndex]
+    const surahServer = selectedmoshaf.dataset.server;
+    const surahList = selectedmoshaf.dataset.surahlist;
+
+    getSurah(surahServer, surahList)
+})
+
+
+}
+
+async function getSurah(surahServer, surahList) {
+    const chooseSurah = document.querySelector('#chooseSurah') 
+
+
+    const res = await fetch(`https://mp3quran.net/api/v3/suwar`) 
+    const data = await res.json()
+    const surahNames = data.suwar;
+
+
+    surahList=surahList.split(',')
+
+    chooseSurah.innerHTML = `<option value="" >اختر سورة</option>`
+
+
+    surahList.forEach(surah  => {
+const padSurah =surah.padStart(3,'0')
+
+
+        surahNames.forEach(surahName => {
+           if (surahName.id==surah){
+              chooseSurah.innerHTML += `<option value="${surahServer}${padSurah}.mp3" >${surahName.name}</option>`;
+          }
+        })
+
+    })
+
+
+chooseSurah.addEventListener('change', e => {
+    const selectedSurah = chooseSurah.options[chooseSurah.selectedIndex]
+    playSurah(selectedSurah.value)
+})
+
+}
+
+function playSurah(surahMp3) {
+    const audioPlayer = document.querySelector('#audioPlayer') 
+     audioPlayer.src = surahMp3;
+     audioPlayer.play();
+
+
+    
+}
+
+       
+  </script>
